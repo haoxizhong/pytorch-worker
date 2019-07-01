@@ -19,20 +19,21 @@ def init_formatter(config, task_list, *args, **params):
         formatter[task] = form.init_formatter(config, task, *args, **params)
 
         def temp_collate_fn(data):
-            return formatter[task].process(data)
+            return formatter[task].process(data, config, task)
 
         collate_fn[task] = temp_collate_fn
 
 
 def init_one_dataset(config, mode, *args, **params):
     temp_mode = mode
-    try:
-        config.get("reader", "%s_dataset_type" % temp_mode)
-    except Exception as e:
-        logger.warning(
-            "[reader] %s_dataset_type has not been defined in config file, use [dataset] train_dataset_type instead." % temp_mode)
-        temp_mode = "train"
-    which = config.get("dataset", "%s_dataset_type" % temp_mode)
+    if mode != "train":
+        try:
+            config.get("data", "%s_dataset_type" % temp_mode)
+        except Exception as e:
+            logger.warning(
+                "[reader] %s_dataset_type has not been defined in config file, use [dataset] train_dataset_type instead." % temp_mode)
+            temp_mode = "train"
+    which = config.get("data", "%s_dataset_type" % temp_mode)
 
     if which in dataset_list:
         dataset = dataset_list[which](config, mode, *args, **params)
@@ -64,6 +65,7 @@ def init_one_dataset(config, mode, *args, **params):
 
         return dataloader
     else:
+        logger.error("There is no dataset called %s, check your config." % which)
         raise NotImplementedError
 
 
