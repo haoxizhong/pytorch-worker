@@ -20,7 +20,7 @@ class BasicBert(nn.Module):
     def init_multi_gpu(self, device, config, *args, **params):
         self.bert = nn.DataParallel(self.bert, device_ids=device)
 
-    def forward(self, data, config, gpu_list, acc_result):
+    def forward(self, data, config, gpu_list, acc_result, mode):
         x = data['input']
 
         _, y = self.bert(x, output_all_encoded_layers=False)
@@ -34,4 +34,4 @@ class BasicBert(nn.Module):
             acc_result = self.accuracy_function(y, label, config, acc_result)
             return {"loss": loss, "acc_result": acc_result}
 
-        return {"acc_result": acc_result}
+        return {}

@@ -92,7 +92,7 @@ def train(parameters, config, gpu_list):
 
                 optimizer.zero_grad()
 
-                results = model(data, config, gpu_list, acc_result)
+                results = model(data, config, gpu_list, acc_result, "train")
 
                 loss, acc_result = results["loss"], results["acc_result"]
                 total_loss += loss

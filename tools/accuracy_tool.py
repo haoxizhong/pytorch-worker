@@ -63,6 +63,10 @@ def gen_micro_macro_result(res):
     }
 
 
+def null_accuracy_function(outputs, label, config, result=None):
+    return None
+
+
 def single_label_top1_accuracy(outputs, label, config, result=None):
     if result is None:
         result = []

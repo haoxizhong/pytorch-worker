@@ -42,6 +42,8 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
             trained_epoch = parameters["trained_epoch"]
             if config.get("train", "optimizer") == parameters["optimizer_name"]:
                 optimizer.load_state_dict(parameters["optimizer"])
+            else:
+                logger.warning("Optimizer changed, do not load parameters of optimizer.")
 
     except Exception as e:
         information = "Cannot load checkpoint file with error %s" % str(e)

@@ -39,7 +39,7 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
                     else:
                         data[key] = Variable(data[key])
 
-            results = model(data, config, gpu_list, acc_result)
+            results = model(data, config, gpu_list, acc_result, "valid")
 
             loss, acc_result = results["loss"], results["acc_result"]
             total_loss += loss
