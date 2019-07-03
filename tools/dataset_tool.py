@@ -2,6 +2,8 @@ import os
 
 
 def dfs_search(path, recursive):
+    if os.path.isfile(path):
+        return [path]
     file_list = []
     name_list = os.listdir(path)
     name_list.sort()

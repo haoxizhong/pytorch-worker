@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 
-from tools.dataset_tools import dfs_search
+from tools.dataset_tool import dfs_search
 
 
 class FilenameOnlyDataset(Dataset):

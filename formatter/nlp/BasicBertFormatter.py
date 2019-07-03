@@ -23,9 +23,12 @@ class BasicBertFormatter(BasicFormatter):
         for temp in data:
             text = temp["text"]
             token = self.tokenizer.tokenize(text)
+            token = ["[CLS]"] + token
 
             while len(token) < self.max_len:
-                token.append("[PAD}")
+                token.append("[PAD]")
+            token = token[0:self.max_len]
+            token = self.tokenizer.convert_tokens_to_ids(token)
 
             input.append(token)
             if mode != "test":

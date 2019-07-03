@@ -4,10 +4,6 @@ import logging
 import formatter as form
 from dataset import dataset_list
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
-                    datefmt='%m/%d/%Y %H:%M:%S',
-                    level=logging.WARN)
-
 logger = logging.getLogger(__name__)
 
 collate_fn = {}
@@ -38,7 +34,7 @@ def init_one_dataset(config, mode, *args, **params):
     if which in dataset_list:
         dataset = dataset_list[which](config, mode, *args, **params)
         batch_size = config.getint("train", "batch_size")
-        shuffle = config.getbollean("train", "shuffle")
+        shuffle = config.getboolean("train", "shuffle")
         reader_num = config.getint("train", "reader_num")
         if mode in ["valid", "test"]:
             try:
