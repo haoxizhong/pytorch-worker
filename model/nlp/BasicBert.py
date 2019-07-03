@@ -22,7 +22,6 @@ class BasicBert(nn.Module):
 
     def forward(self, data, config, gpu_list, acc_result):
         x = data['input']
-        print(x.size())
 
         _, y = self.bert(x, output_all_encoded_layers=False)
         y = y.view(y.size()[0], -1)

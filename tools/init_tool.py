@@ -26,6 +26,14 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
     optimizer = init_optimizer(model, config, *args, **params)
     trained_epoch = 0
 
+    if len(gpu_list) > 0:
+        model = model.cuda()
+
+        try:
+            model.init_multi_gpu(gpu_list, config, *args, **params)
+        except Exception as e:
+            logger.warning("No init_multi_gpu implemented in the model, use single gpu instead.")
+
     try:
         parameters = torch.load(checkpoint)
         model.load_state_dict(parameters["model"])
@@ -33,7 +41,7 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
         if mode == "train":
             trained_epoch = parameters["trained_epoch"]
             if config.get("train", "optimizer") == parameters["optimizer_name"]:
-                optimizer.load_state_dice(parameters["optimizer"])
+                optimizer.load_state_dict(parameters["optimizer"])
 
     except Exception as e:
         information = "Cannot load checkpoint file with error %s" % str(e)
@@ -42,14 +50,6 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
             raise NotImplementedError
         else:
             logger.warning(information)
-
-    if len(gpu_list) > 0:
-        model = model.cuda()
-
-        try:
-            model.init_multi_gpu(gpu_list, config, *args, **params)
-        except Exception as e:
-            logger.warning("No init_multi_gpu implemented in the model, use single gpu instead.")
 
     result["model"] = model
     if mode == "train":

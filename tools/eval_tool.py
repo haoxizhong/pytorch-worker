@@ -12,9 +12,13 @@ logger = logging.getLogger(__name__)
 def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
     model.eval()
 
-    batch_size = config.getint("train", "batch_size")
+    ncols = None
+    try:
+        ncol = config.getint("output", "tqdm_ncols")
+    except Exception as e:
+        ncol = None
 
-    logger.info("Training start....")
+    # logger.info("Training start....")
 
     # print('** start training here! **')
     # print('----------------|----------TRAIN-----------|----------VALID-----------|----------------|')
@@ -26,7 +30,7 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
     total_loss = 0
     cnt = 0
 
-    with tqdm(dataset, desc="Valid Iteration") as T:
+    with tqdm(dataset, desc="Valid Epoch %d" % epoch, ncols=ncol) as T:
         for step, data in enumerate(T):
             for key in data.keys():
                 if isinstance(data[key], torch.Tensor):
@@ -41,8 +45,13 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
             total_loss += loss
             cnt += 1
 
-        output_info = output_function(acc_result, config)
-        T.set_postfix(loss=float(total_loss) / (step + 1), output=output_info)
+            if step == len(dataset) - 1:
+                output_info = output_function(acc_result, config)
+                T.set_postfix(loss=float(total_loss) / cnt, output=output_info)
+
         # tqdm.write("Epoch %d\tIter %d\t\tLoss %.3f\t\t%s" % (epoch, cnt, float(total_loss) / cnt, output_info))
+
+        print("")
+        print("")
 
     model.train()

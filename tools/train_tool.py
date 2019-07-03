@@ -31,8 +31,16 @@ def train(parameters, config, gpu_list):
 
     output_time = config.getint("output", "output_time")
     test_time = config.getint("output", "test_time")
+    ncols = None
+    try:
+        ncol = config.getint("output", "tqdm_ncols")
+    except Exception as e:
+        ncol = None
 
-    output_path = config.get("output", "model_path")
+    output_path = os.path.join(config.get("output", "model_path"), config.get("output", "model_name"))
+    if os.path.exists(output_path):
+        logger.warning("Output path exists, check whether need to change a name of model")
+    os.makedirs(output_path, exist_ok=True)
 
     trained_epoch = parameters["trained_epoch"]
     model = parameters["model"]
@@ -63,8 +71,8 @@ def train(parameters, config, gpu_list):
     # print('----------------|--------------------------|--------------------------|----------------|')
     # start = timer()
 
-    for epoch_num in enumerate(tqdm(range(trained_epoch, epoch), desc="Epoch")):
-        current_epoch = epoch_num[0]
+    for epoch_num in enumerate(tqdm(range(trained_epoch, epoch), desc="Epoch", ncols=ncol)):
+        current_epoch = epoch_num[1]
 
         exp_lr_scheduler.step(current_epoch)
 
@@ -72,12 +80,9 @@ def train(parameters, config, gpu_list):
         total_loss = 0
 
         # for step,data in enumerate(dataset):
-        with tqdm(dataset, desc="Train Iteration") as T:
+        with tqdm(dataset, desc="Train Epoch %d" % current_epoch, ncols=ncol) as T:
             output_info = ""
             for step, data in enumerate(T):
-
-                if step < 1245:
-                    continue
                 for key in data.keys():
                     if isinstance(data[key], torch.Tensor):
                         if len(gpu_list) > 0:
@@ -103,6 +108,7 @@ def train(parameters, config, gpu_list):
 
                 T.set_postfix(loss=float(total_loss) / (step + 1), output=output_info)
 
+        print("")
         checkpoint(os.path.join(output_path, "%d.pkl" % current_epoch), model, optimizer, current_epoch, config)
 
         if current_epoch % test_time == 0:

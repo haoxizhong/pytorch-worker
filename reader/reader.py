@@ -36,7 +36,11 @@ def init_one_dataset(config, mode, *args, **params):
         batch_size = config.getint("train", "batch_size")
         shuffle = config.getboolean("train", "shuffle")
         reader_num = config.getint("train", "reader_num")
+        drop_last = True
         if mode in ["valid", "test"]:
+            if mode == "test":
+                drop_last = False
+
             try:
                 batch_size = config.getint("eval", "batch_size")
             except Exception as e:
@@ -48,7 +52,7 @@ def init_one_dataset(config, mode, *args, **params):
                 shuffle = False
                 logger.warning("[eval] shuffle has not been defined in config file, use false as default.")
             try:
-                batch_size = config.getint("eval", "reader_num")
+                reader_num = config.getint("eval", "reader_num")
             except Exception as e:
                 logger.warning("[eval] reader num has not been defined in config file, use [train] reader num instead.")
 
@@ -57,7 +61,7 @@ def init_one_dataset(config, mode, *args, **params):
                                 shuffle=shuffle,
                                 num_workers=reader_num,
                                 collate_fn=collate_fn[mode],
-                                drop_last=False)
+                                drop_last=drop_last)
 
         return dataloader
     else:
