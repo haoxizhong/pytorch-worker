@@ -8,14 +8,11 @@ import numpy as np
 class MultiLabelSoftmaxLoss(nn.Module):
     def __init__(self, config):
         super(MultiLabelSoftmaxLoss, self).__init__()
-        self.task = config.get("train", "task").replace(" ", "").split(",")
-        for a in range(0, len(self.task)):
-            self.task[a] = int(self.task[a])
+        self.task_num = config.getint("model", "output_dim")
         self.criterion = []
-        for a in range(0, len(self.task)):
-            task = self.task[a]
+        for a in range(0, self.task_num):
             try:
-                ratio = config.getfloat("train", "loss_weight_%d" % task)
+                ratio = config.getfloat("train", "loss_weight_%d" % a)
                 self.criterion.append(
                     nn.CrossEntropyLoss(weight=torch.from_numpy(np.array([1.0, ratio], dtype=np.float32)).cuda()))
                 # print_info("Task %d with weight %.3lf" % (task, ratio))
