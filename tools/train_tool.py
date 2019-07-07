@@ -6,17 +6,19 @@ from torch.optim import lr_scheduler
 from tensorboardX import SummaryWriter
 from tqdm import tqdm, trange
 from tools.eval_tool import valid
+import shutil
 
 logger = logging.getLogger(__name__)
 
 
-def checkpoint(filename, model, optimizer, trained_epoch, config):
+def checkpoint(filename, model, optimizer, trained_epoch, config, global_step):
     model_to_save = model.module if hasattr(model, 'module') else model
     save_params = {
         "model": model_to_save.state_dict(),
         "optimizer_name": config.get("train", "optimizer"),
         "optimizer": optimizer.state_dict(),
-        "trained_epoch": trained_epoch
+        "trained_epoch": trained_epoch,
+        "global_step": global_step
     }
 
     try:
@@ -46,17 +48,18 @@ def train(parameters, config, gpu_list):
     model = parameters["model"]
     optimizer = parameters["optimizer"]
     dataset = parameters["train_dataset"]
+    global_step = parameters["global_step"]
     output_function = parameters["output_function"]
 
-    # os.makedirs(os.path.join(config.get("output", "tensorboard_path")), exist_ok=True)
+    if trained_epoch == 0:
+        shutil.rmtree(
+            os.path.join(config.get("output", "tensorboard_path"), config.get("output", "model_name")), True)
 
-    # if trained_epoch == 0:
-    #    shutil.rmtree(
-    #        os.path.join(config.get("output", "tensorboard_path"), config.get("output", "model_name")), True)
+    os.makedirs(os.path.join(config.get("output", "tensorboard_path"), config.get("output", "model_name")),
+                exist_ok=True)
 
-    writer = SummaryWriter(
-        os.path.join(config.get("output", "tensorboard_path"), config.get("output", "model_name")),
-        config.get("output", "model_name"))
+    writer = SummaryWriter(os.path.join(config.get("output", "tensorboard_path"), config.get("output", "model_name")),
+                           config.get("output", "model_name"))
 
     step_size = config.getint("train", "step_size")
     gamma = config.getfloat("train", "lr_multiplier")
@@ -64,12 +67,6 @@ def train(parameters, config, gpu_list):
     exp_lr_scheduler.step(trained_epoch)
 
     logger.info("Training start....")
-
-    # print('** start training here! **')
-    # print('----------------|----------TRAIN-----------|----------VALID-----------|----------------|')
-    # print('  lr    epoch   |   loss           evalu   |   loss           evalu   |      time      | Forward num')
-    # print('----------------|--------------------------|--------------------------|----------------|')
-    # start = timer()
 
     for epoch_num in enumerate(tqdm(range(trained_epoch, epoch), desc="Epoch", ncols=ncol)):
         current_epoch = epoch_num[1]
@@ -107,9 +104,14 @@ def train(parameters, config, gpu_list):
                     #    current_epoch, step, float(total_loss) / (step + 1), output_info))
 
                 T.set_postfix(loss=float(total_loss) / (step + 1), output=output_info)
+                global_step += 1
+                writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
 
         print("")
-        checkpoint(os.path.join(output_path, "%d.pkl" % current_epoch), model, optimizer, current_epoch, config)
+        checkpoint(os.path.join(output_path, "%d.pkl" % current_epoch), model, optimizer, current_epoch, config,
+                   global_step)
+        writer.add_scalar(config.get("output", "model_name") + "_train_epoch", float(total_loss) / (step + 1),
+                          current_epoch)
 
         if current_epoch % test_time == 0:
             with torch.no_grad():

@@ -54,4 +54,7 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
         print("")
         print("")
 
+        writer.add_scalar(config.get("output", "model_name") + "_eval_epoch", float(total_loss) / (step + 1),
+                          epoch)
+
     model.train()

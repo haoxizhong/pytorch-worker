@@ -25,6 +25,7 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
     model = get_model(config.get("model", "model_name"))(config, gpu_list, *args, **params)
     optimizer = init_optimizer(model, config, *args, **params)
     trained_epoch = 0
+    global_step = 0
 
     if len(gpu_list) > 0:
         model = model.cuda()
@@ -45,6 +46,8 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
             else:
                 logger.warning("Optimizer changed, do not load parameters of optimizer.")
 
+            if "global_step" in parameters:
+                global_step = parameters["global_step"]
     except Exception as e:
         information = "Cannot load checkpoint file with error %s" % str(e)
         if mode == "test":
@@ -58,6 +61,7 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
         result["optimizer"] = optimizer
         result["trained_epoch"] = trained_epoch
         result["output_function"] = init_output_function(config)
+        result["global_step"] = global_step
 
     logger.info("Initialize done.")
 
