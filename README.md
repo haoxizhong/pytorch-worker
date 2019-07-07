@@ -312,12 +312,11 @@ def FunctionName(data, config, *args, **params):
 
 ## 依赖库
 
-请参考``requirements.txt``。（尚未完成）
+请参考``requirements.txt``。
 
 ## 未来计划
 
-1. 添加对``Tensorboard``的支持。
-2. 添加各种``loss``函数。
+1. 添加可定制化的tensorboard显示。
 3. 添加对``lr_scheduler``的可定制化支持。
 4. 优化进度条的显示模式。
 5. 在各个可定制化模块中增加更多常用方法。
