@@ -4,9 +4,10 @@ import torch
 from torch.autograd import Variable
 from torch.optim import lr_scheduler
 from tensorboardX import SummaryWriter
-from tqdm import tqdm, trange
-from tools.eval_tool import valid
 import shutil
+from timeit import default_timer as timer
+
+from tools.eval_tool import valid, gen_time_str
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +34,6 @@ def train(parameters, config, gpu_list):
 
     output_time = config.getint("output", "output_time")
     test_time = config.getint("output", "test_time")
-    ncols = None
-    try:
-        ncol = config.getint("output", "tqdm_ncols")
-    except Exception as e:
-        ncol = None
 
     output_path = os.path.join(config.get("output", "model_path"), config.get("output", "model_name"))
     if os.path.exists(output_path):
@@ -67,47 +63,62 @@ def train(parameters, config, gpu_list):
     exp_lr_scheduler.step(trained_epoch)
 
     logger.info("Training start....")
+    start_time = timer()
 
-    for epoch_num in enumerate(tqdm(range(trained_epoch, epoch), desc="Epoch", ncols=ncol)):
-        current_epoch = epoch_num[1]
+    print("Epoch\tStage\tIterations\tTime Usage\tOutput Information")
+
+    total_len = len(dataset)
+    more = ""
+    if total_len < 10000:
+        more = "\t"
+    for epoch_num in range(trained_epoch, epoch):
+        current_epoch = epoch_num
 
         exp_lr_scheduler.step(current_epoch)
 
         acc_result = None
         total_loss = 0
 
-        # for step,data in enumerate(dataset):
-        with tqdm(dataset, desc="Train Epoch %d" % current_epoch, ncols=ncol) as T:
-            output_info = ""
-            for step, data in enumerate(T):
-                for key in data.keys():
-                    if isinstance(data[key], torch.Tensor):
-                        if len(gpu_list) > 0:
-                            data[key] = Variable(data[key].cuda())
-                        else:
-                            data[key] = Variable(data[key])
+        output_info = ""
+        step = -1
+        for step, data in enumerate(dataset):
+            for key in data.keys():
+                if isinstance(data[key], torch.Tensor):
+                    if len(gpu_list) > 0:
+                        data[key] = Variable(data[key].cuda())
+                    else:
+                        data[key] = Variable(data[key])
 
-                optimizer.zero_grad()
+            optimizer.zero_grad()
 
-                results = model(data, config, gpu_list, acc_result, "train")
+            results = model(data, config, gpu_list, acc_result, "train")
 
-                loss, acc_result = results["loss"], results["acc_result"]
-                total_loss += loss
+            loss, acc_result = results["loss"], results["acc_result"]
+            total_loss += loss
 
-                loss.backward()
-                optimizer.step()
+            loss.backward()
+            optimizer.step()
 
-                if step % output_time == 0:
-                    output_info = output_function(acc_result, config)
+            if step % output_time == 0:
+                output_info = output_function(acc_result, config)
 
-                    # tqdm.write("Epoch %d\tIter %d\t\tLoss %.3f\t\t%s" % (
-                    #    current_epoch, step, float(total_loss) / (step + 1), output_info))
+                delta_t = timer() - start_time
 
-                T.set_postfix(loss=float(total_loss) / (step + 1), output=output_info)
-                global_step += 1
-                writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
+                print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
+                    current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
+                    gen_time_str(delta_t * (step + 1) / total_len), output_info), end='\r')
 
-        print("")
+            global_step += 1
+            writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
+
+        print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
+            current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
+            gen_time_str(delta_t * (step + 1) / total_len), output_info))
+
+        if step == -1:
+            logger.error("There is no data given to the model in this epoch, check your data.")
+            raise NotImplementedError
+
         checkpoint(os.path.join(output_path, "%d.pkl" % current_epoch), model, optimizer, current_epoch, config,
                    global_step)
         writer.add_scalar(config.get("output", "model_name") + "_train_epoch", float(total_loss) / (step + 1),
