@@ -32,7 +32,6 @@ class JsonFromFilesDataset(Dataset):
                     f = open(filename, "r", encoding=encoding)
                     for line in f:
                         self.data.append(json.loads(line))
-
         else:
             self.total = 0
             self.prefix_file_cnt = []
