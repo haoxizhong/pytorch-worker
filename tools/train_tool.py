@@ -63,7 +63,6 @@ def train(parameters, config, gpu_list):
     exp_lr_scheduler.step(trained_epoch)
 
     logger.info("Training start....")
-    start_time = timer()
 
     print("Epoch\tStage\tIterations\tTime Usage\tOutput Information")
 
@@ -72,6 +71,7 @@ def train(parameters, config, gpu_list):
     if total_len < 10000:
         more = "\t"
     for epoch_num in range(trained_epoch, epoch):
+        start_time = timer()
         current_epoch = epoch_num
 
         exp_lr_scheduler.step(current_epoch)
@@ -106,14 +106,14 @@ def train(parameters, config, gpu_list):
 
                 print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
                     current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
-                    gen_time_str(delta_t * (step + 1) / total_len), output_info), end='\r')
+                    gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), output_info), end='\r')
 
             global_step += 1
             writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
 
         print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
             current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
-            gen_time_str(delta_t * (step + 1) / total_len), output_info))
+            gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), output_info))
 
         if step == -1:
             logger.error("There is no data given to the model in this epoch, check your data.")
