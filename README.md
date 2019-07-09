@@ -318,7 +318,6 @@ def FunctionName(data, config, *args, **params):
 
 1. 添加可定制化的tensorboard显示。
 3. 添加对``lr_scheduler``的可定制化支持。
-4. 优化进度条的显示模式。
 5. 在各个可定制化模块中增加更多常用方法。
 
 ## 作者与致谢
