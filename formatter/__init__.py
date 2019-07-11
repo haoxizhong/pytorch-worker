@@ -4,12 +4,15 @@ from .Basic import BasicFormatter
 from .nlp.BasicBertFormatter import BasicBertFormatter
 from .cv.BasicResnetFormatter import BasicResnetFormatter
 
+from .demo.demo import BertCailFormatter
+
 logger = logging.getLogger(__name__)
 
 formatter_list = {
     "Basic": BasicFormatter,
     "BasicBert": BasicBertFormatter,
-    "BasicResnet": BasicResnetFormatter
+    "BasicResnet": BasicResnetFormatter,
+    "MultiTaskBert": BertCailFormatter
 }
 
 

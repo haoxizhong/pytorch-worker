@@ -1,8 +1,10 @@
 from .output_tool import basic_output_function, null_output_function
+from .output_tool import multi_task_function
 
 output_function_dic = {
     "Basic": basic_output_function,
-    "Null": null_output_function
+    "Null": null_output_function,
+    "multi_task_function": multi_task_function
 }
 
 

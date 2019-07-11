@@ -1,7 +1,10 @@
 from .nlp.BasicBert import BasicBert
+from .demo.MultiTaskBert import MultiTaskBert
+
 
 model_list = {
-    "BasicBert": BasicBert
+    "BasicBert": BasicBert,
+    "MultiTaskBert": MultiTaskBert
 }
 
 
