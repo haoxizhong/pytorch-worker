@@ -43,7 +43,7 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
         results = model(data, config, gpu_list, acc_result, "valid")
 
         loss, acc_result = results["loss"], results["acc_result"]
-        total_loss += loss
+        total_loss += float(loss)
         cnt += 1
 
         if step % output_time == 0:

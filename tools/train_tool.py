@@ -94,7 +94,7 @@ def train(parameters, config, gpu_list):
             results = model(data, config, gpu_list, acc_result, "train")
 
             loss, acc_result = results["loss"], results["acc_result"]
-            total_loss += loss
+            total_loss += float(loss)
 
             loss.backward()
             optimizer.step()
