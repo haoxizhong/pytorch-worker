@@ -64,7 +64,7 @@ def train(parameters, config, gpu_list):
 
     logger.info("Training start....")
 
-    print("Epoch\tStage\tIterations\tTime Usage\tOutput Information")
+    print("Epoch\tStage\tIterations\tTime Usage\tLoss\tOutput Information")
 
     total_len = len(dataset)
     more = ""
@@ -104,16 +104,17 @@ def train(parameters, config, gpu_list):
 
                 delta_t = timer() - start_time
 
-                print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
+                print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
                     current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
-                    gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), output_info), end='\r')
+                    gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info),
+                      end='\r')
 
             global_step += 1
             writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
 
-        print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
+        print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
             current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
-            gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), output_info))
+            gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info))
 
         if step == -1:
             logger.error("There is no data given to the model in this epoch, check your data.")

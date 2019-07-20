@@ -49,9 +49,10 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
         if step % output_time == 0:
             delta_t = timer() - start_time
 
-            print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
+            print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
                 epoch, "valid", step + 1, total_len, more, gen_time_str(delta_t),
-                gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), output_info), end='\r')
+                gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info),
+                  end='\r')
 
     if step == -1:
         logger.error("There is no data given to the model in this epoch, check your data.")
@@ -59,9 +60,9 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
 
     delta_t = timer() - start_time
     output_info = output_function(acc_result, config)
-    print("%d\t%s\t%d/%d%s\t%s/%s\t%s" % (
+    print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
         epoch, "valid", step + 1, total_len, more, gen_time_str(delta_t),
-        gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), output_info))
+        gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info))
 
     writer.add_scalar(config.get("output", "model_name") + "_eval_epoch", float(total_loss) / (step + 1),
                       epoch)
