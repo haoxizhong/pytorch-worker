@@ -85,7 +85,7 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
     output_info = output_function(acc_result, config)
     output_value(epoch, "valid", "%d/%d" % (step + 1, total_len), "%s/%s" % (
         gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
-                 "%.3lf" % (total_loss / (step + 1)), output_info, '\r')
+                 "%.3lf" % (total_loss / (step + 1)), output_info, None)
 
     writer.add_scalar(config.get("output", "model_name") + "_eval_epoch", float(total_loss) / (step + 1),
                       epoch)
