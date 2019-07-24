@@ -16,6 +16,30 @@ def gen_time_str(t):
     return '%2d:%02d' % (minute, second)
 
 
+def output_value(epoch, mode, step, time, loss, info, end):
+    s = ""
+    s = s + str(epoch) + " "
+    while len(s) < 7:
+        s += " "
+    s = s + str(mode) + " "
+    while len(s) < 14:
+        s += " "
+    s = s + str(step) + " "
+    while len(s) < 25:
+        s += " "
+    s += str(time)
+    while len(s) < 40:
+        s += " "
+    s += str(loss)
+    while len(s) < 48:
+        s += " "
+    s += str(info)
+    if not (end is None):
+        print(s, end=end)
+    else:
+        print(s)
+
+
 def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
     model.eval()
 
@@ -49,10 +73,9 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
         if step % output_time == 0:
             delta_t = timer() - start_time
 
-            print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
-                epoch, "valid", step + 1, total_len, more, gen_time_str(delta_t),
-                gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info),
-                  end='\r')
+            output_value(epoch, "valid", "%d/%d" % (step + 1, total_len), "%s/%s" % (
+                gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
+                         "%.3lf" % (total_loss / (step + 1)), output_info, '\r')
 
     if step == -1:
         logger.error("There is no data given to the model in this epoch, check your data.")
@@ -60,9 +83,9 @@ def valid(model, dataset, epoch, writer, config, gpu_list, output_function):
 
     delta_t = timer() - start_time
     output_info = output_function(acc_result, config)
-    print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
-        epoch, "valid", step + 1, total_len, more, gen_time_str(delta_t),
-        gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info))
+    output_value(epoch, "valid", "%d/%d" % (step + 1, total_len), "%s/%s" % (
+        gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
+                 "%.3lf" % (total_loss / (step + 1)), output_info, '\r')
 
     writer.add_scalar(config.get("output", "model_name") + "_eval_epoch", float(total_loss) / (step + 1),
                       epoch)

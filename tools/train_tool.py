@@ -7,7 +7,7 @@ from tensorboardX import SummaryWriter
 import shutil
 from timeit import default_timer as timer
 
-from tools.eval_tool import valid, gen_time_str
+from tools.eval_tool import valid, gen_time_str, output_value
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def train(parameters, config, gpu_list):
 
     logger.info("Training start....")
 
-    print("Epoch\tStage\tIterations\tTime Usage\tLoss\tOutput Information")
+    print("Epoch  Stage  Iterations  Time Usage    Loss    Output Information")
 
     total_len = len(dataset)
     more = ""
@@ -104,17 +104,16 @@ def train(parameters, config, gpu_list):
 
                 delta_t = timer() - start_time
 
-                print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
-                    current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
-                    gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info),
-                      end='\r')
+                output_value(current_epoch, "train", "%d/%d" % (step + 1, total_len), "%s/%s" % (
+                    gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
+                             "%.3lf" % (total_loss / (step + 1)), output_info, '\r')
 
             global_step += 1
             writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
 
-        print("%d\t%s\t%d/%d%s\t%s/%s\t%.3lf\t%s" % (
-            current_epoch, "train", step + 1, total_len, more, gen_time_str(delta_t),
-            gen_time_str(delta_t * (total_len - step - 1) / (step + 1)), total_loss / (step + 1), output_info))
+        output_value(current_epoch, "train", "%d/%d" % (step + 1, total_len), "%s/%s" % (
+            gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
+                     "%.3lf" % (total_loss / (step + 1)), output_info, None)
 
         if step == -1:
             logger.error("There is no data given to the model in this epoch, check your data.")
