@@ -106,14 +106,14 @@ def train(parameters, config, gpu_list):
 
                 output_value(current_epoch, "train", "%d/%d" % (step + 1, total_len), "%s/%s" % (
                     gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
-                             "%.3lf" % (total_loss / (step + 1)), output_info, '\r')
+                             "%.3lf" % (total_loss / (step + 1)), output_info, '\r', config)
 
             global_step += 1
             writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
 
         output_value(current_epoch, "train", "%d/%d" % (step + 1, total_len), "%s/%s" % (
             gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
-                     "%.3lf" % (total_loss / (step + 1)), output_info, None)
+                     "%.3lf" % (total_loss / (step + 1)), output_info, None, config)
 
         if step == -1:
             logger.error("There is no data given to the model in this epoch, check your data.")
