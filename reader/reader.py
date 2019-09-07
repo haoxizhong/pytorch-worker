@@ -14,10 +14,21 @@ def init_formatter(config, task_list, *args, **params):
     for task in task_list:
         formatter[task] = form.init_formatter(config, task, *args, **params)
 
-        def temp_collate_fn(data):
-            return formatter[task].process(data, config, task)
+        def train_collate_fn(data):
+            return formatter["train"].process(data, config, task)
 
-        collate_fn[task] = temp_collate_fn
+        def valid_collate_fn(data):
+            return formatter["valid"].process(data, config, task)
+
+        def test_collate_fn(data):
+            return formatter["test"].process(data, config, task)
+
+        if task == "train":
+            collate_fn[task] = train_collate_fn
+        elif task == "valid":
+            collate_fn[task] = valid_collate_fn
+        else:
+            collate_fn[task] = test_collate_fn
 
 
 def init_one_dataset(config, mode, *args, **params):

@@ -50,7 +50,13 @@ python3 train.py --config 配置文件 --gpu GPU列表 --checkpoint 模型参数
 
 ### 模型测试
 
-待补充。
+模型测试的运行方法：
+
+```bash
+python3 test.py --config 配置文件 --gpu GPU列表 --checkpoint 模型参数文件 --result 测试结果保存文件
+```
+
+会将测试的结果以json格式保存到结果文件中。
 
 ## 配置文件
 
@@ -126,7 +132,6 @@ python3 train.py --config config/nlp/BasicBert.config
 - ``accuracy_method``：必要参数，计算模型好坏程度的[指标函数](#指标函数)。
 - ``output_function``：必要参数，用来产生中间[指标输出](#指标输出)的函数。
 - ``output_value``：可选参数（仅用于``Basic``版本的指标输出函数），用来选择要输出的指标。
-- ``tqdm_ncols``：可选参数，代表框架运行时进度条的宽度，如果不选则默认为一行。
 
 ## 新方法的添加和已有方法
 
@@ -224,6 +229,7 @@ class ModelName(nn.Module):
         # mode为模型的模式，包括train、valid和test三种模式
         # 返回格式为要求为python的dict
         # 在train和valid模式中，由于需要衡量模型和优化模型，返回的结果中必须包含loss和acc_result两个字段，分别代表损失函数的结果和累计的指标量。acc_result的计算在这里并不是必须的，但是如果想从多维的角度评判模型请一定使用
+        # 在test模式中，会将output字段作为结果进行记录，所以需要保证output字段的类型必须为list，且其中的内容能够被json化
         pass
 ```
 

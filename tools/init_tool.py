@@ -52,7 +52,7 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
         information = "Cannot load checkpoint file with error %s" % str(e)
         if mode == "test":
             logger.error(information)
-            raise NotImplementedError
+            raise e
         else:
             logger.warning(information)
 
