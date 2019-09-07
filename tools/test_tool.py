@@ -35,9 +35,6 @@ def test(parameters, config, gpu_list):
 
         results = model(data, config, gpu_list, acc_result, "test")
         result = result + results["output"]
-
-        loss, acc_result = results["loss"], results["acc_result"]
-        total_loss += float(loss)
         cnt += 1
 
         if step % output_time == 0:
