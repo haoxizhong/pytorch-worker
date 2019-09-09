@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def test(parameters, config, gpu_list):
     model = parameters["model"]
-    dataset = parameters["dataset"]
+    dataset = parameters["test_dataset"]
     model.eval()
 
     acc_result = None
