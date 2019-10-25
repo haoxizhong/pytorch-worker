@@ -70,7 +70,7 @@ class JsonFromFilesDataset(Dataset):
         r = len(self.prefix_file_cnt)
         while l + 1 != r:
             m = (l + r) // 2
-            if self.prefix_file_cnt[m] > item:
+            if self.prefix_file_cnt[m] <= item:
                 l = m
             else:
                 r = m
