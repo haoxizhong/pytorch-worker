@@ -1,3 +1,4 @@
+import os
 from torch.utils.data import Dataset
 
 from tools.dataset_tool import dfs_search
@@ -14,7 +15,7 @@ class FilenameOnlyDataset(Dataset):
         recursive = config.getboolean("data", "recursive")
 
         for name in filename_list:
-            self.file_list = self.file_list + dfs_search(name, recursive)
+            self.file_list = self.file_list + dfs_search(os.path.join(self.data_path, name), recursive)
         self.file_list.sort()
 
     def __getitem__(self, item):
