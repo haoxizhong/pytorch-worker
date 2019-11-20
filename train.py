@@ -18,6 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('--config', '-c', help="specific config file", required=True)
     parser.add_argument('--gpu', '-g', help="gpu id list")
     parser.add_argument('--checkpoint', help="checkpoint file path")
+    parser.add_argument('--do_test', help="do test while training or not", action="store_true")
     args = parser.parse_args()
 
     configFilePath = args.config
@@ -45,5 +46,8 @@ if __name__ == "__main__":
         raise NotImplementedError
 
     parameters = init_all(config, gpu_list, args.checkpoint, "train")
+    do_test = False
+    if args.do_test:
+        do_test = True
 
-    train(parameters, config, gpu_list)
+    train(parameters, config, gpu_list, do_test)

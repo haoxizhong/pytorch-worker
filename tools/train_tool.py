@@ -8,6 +8,7 @@ import shutil
 from timeit import default_timer as timer
 
 from tools.eval_tool import valid, gen_time_str, output_value
+from tools.init_tool import init_test_dataset, init_formatter
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ def checkpoint(filename, model, optimizer, trained_epoch, config, global_step):
         logger.warning("Cannot save models with error %s, continue anyway" % str(e))
 
 
-def train(parameters, config, gpu_list):
+def train(parameters, config, gpu_list, do_test=False):
     epoch = config.getint("train", "epoch")
     batch_size = config.getint("train", "batch_size")
 
@@ -40,12 +41,16 @@ def train(parameters, config, gpu_list):
         logger.warning("Output path exists, check whether need to change a name of model")
     os.makedirs(output_path, exist_ok=True)
 
-    trained_epoch = parameters["trained_epoch"]
+    trained_epoch = parameters["trained_epoch"] + 1
     model = parameters["model"]
     optimizer = parameters["optimizer"]
     dataset = parameters["train_dataset"]
     global_step = parameters["global_step"]
     output_function = parameters["output_function"]
+
+    if do_test:
+        init_formatter(config, ["test"])
+        test_dataset = init_test_dataset(config)
 
     if trained_epoch == 0:
         shutil.rmtree(
@@ -127,3 +132,5 @@ def train(parameters, config, gpu_list):
         if current_epoch % test_time == 0:
             with torch.no_grad():
                 valid(model, parameters["valid_dataset"], current_epoch, writer, config, gpu_list, output_function)
+                if do_test:
+                    valid(model, test_dataset, current_epoch, writer, config, gpu_list, output_function, mode="test")
