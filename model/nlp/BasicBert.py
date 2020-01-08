@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pytorch_pretrained_bert import BertModel
+from pytorch_transformers import BertModel
 
 from tools.accuracy_init import init_accuracy_function
 
@@ -23,7 +23,7 @@ class BasicBert(nn.Module):
     def forward(self, data, config, gpu_list, acc_result, mode):
         x = data['input']
 
-        _, y = self.bert(x, output_all_encoded_layers=False)
+        _, y = self.bert(x)
         y = y.view(y.size()[0], -1)
         y = self.fc(y)
         y = y.view(y.size()[0], -1)
