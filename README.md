@@ -2,7 +2,7 @@
 
 本框架为基于pytorch的模型训练、测试框架。该框架的目的是方便大家快速上手写出pytorch的模型，同时能够定制化属于自己的模型、输出、数据处理和评价指标，方便大家快速完成同任务上的大量模型的实验。
 
-英文的README可以通过[这里](https://github.com/haoxizhong/pytorch-worker/blob/master/README,md)访问。
+<del>英文的README可以通过[这里](https://github.com/haoxizhong/pytorch-worker/blob/master/README,md)访问。</del>
 
 ## 目录
 
@@ -12,6 +12,7 @@
 - [新方法的添加和已有方法](#新方法的添加和已有方法)
 - [依赖库](#依赖库)
 - [未来计划](#未来计划)
+- [更新记录](#更新记录)
 - [作者与致谢](#作者与致谢)
 
 ## 运行方法
@@ -31,6 +32,14 @@ python3 train.py --config 配置文件 --gpu GPU列表
 ```bash
 python3 train.py --config config/nlp/BasicBert.config --gpu 2,3,5
 ```
+
+此外，除了原始的``DataParallel``的方法以外，我们还提供了使用``DistributedDataParallel``的多卡并行方法，运行命令为：
+
+```bash
+python3 -m torch.distributed.launch train.py --config config/nlp/BasicBert.config --gpu 2,3,5
+```
+
+具体的实现方法请参考模型中的写法。
 
 当然，如果你不想使用GPU来运行你的模型的话，你可以去掉``--gpu``选项来完成这一点，例如：
 
@@ -115,6 +124,11 @@ python3 train.py --config config/nlp/BasicBert.config
 - ``json_format``：可选参数（仅用于``ImageFromJson,JsonFromFiles``两种数据读取器），代表对应的``json``文件的格式。如果为``line``代表一行一个``json``数据；如果为``single``代表整个文件为一个``json``数据。
 - ``load_into_mem``：可选参数（仅用于``ImageFromJson,JsonFromFiles``两种数据读取器），代表是否提前把所有数据加载到内存中。
 - ``prefix``：可选参数（仅用于``ImageFromJson``数据读取器），代表图片的相对路径起始位置。
+
+**[distributed]： 多卡参数**
+
+- ``use``：必要参数，代表是否使用``DistributedDataParallel``。
+- ``backend``：可选参数（仅当``use``为``True``生效），代表所使用的``backend``，如果你不了解这是什么东西保持默认即可。
 
 **[model]：模型用参数**
 
@@ -325,6 +339,17 @@ def FunctionName(data, config, *args, **params):
 1. 添加可定制化的tensorboard显示。
 3. 添加对``lr_scheduler``的可定制化支持。
 5. 在各个可定制化模块中增加更多常用方法。
+
+
+## 更新记录
+
+### V1.0.1
+
+2020.04.22 加入了多显卡内存更平衡运行速度更快的方法。
+
+### V1.0.0
+
+2020.01.01 完成最基本的框架。
 
 ## 作者与致谢
 

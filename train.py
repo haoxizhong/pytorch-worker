@@ -19,9 +19,14 @@ if __name__ == "__main__":
     parser.add_argument('--gpu', '-g', help="gpu id list")
     parser.add_argument('--checkpoint', help="checkpoint file path")
     parser.add_argument('--do_test', help="do test while training or not", action="store_true")
+    parser.add_argument('--local_rank', help='local rank', default=0)
     args = parser.parse_args()
 
     configFilePath = args.config
+
+    config = create_config(configFilePath)
+    if config.getboolean("distributed", "use"):
+        torch.distributed.init_process_group(backend=config.get("distributed", "backend"))
 
     use_gpu = True
     gpu_list = []
@@ -36,8 +41,6 @@ if __name__ == "__main__":
             gpu_list.append(int(a))
 
     os.system("clear")
-
-    config = create_config(configFilePath)
 
     cuda = torch.cuda.is_available()
     logger.info("CUDA available: %s" % str(cuda))
