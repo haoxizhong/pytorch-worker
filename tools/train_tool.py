@@ -115,7 +115,9 @@ def train(parameters, config, gpu_list, do_test=False):
 
             global_step += 1
             writer.add_scalar(config.get("output", "model_name") + "_train_iter", float(loss), global_step)
-
+            
+        output_info = output_function(acc_result, config)
+        delta_t = timer() - start_time
         output_value(current_epoch, "train", "%d/%d" % (step + 1, total_len), "%s/%s" % (
             gen_time_str(delta_t), gen_time_str(delta_t * (total_len - step - 1) / (step + 1))),
                      "%.3lf" % (total_loss / (step + 1)), output_info, None, config)
