@@ -14,10 +14,10 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
 
     logger.info("Begin to initialize dataset and formatter...")
     if mode == "train":
-        init_formatter(config, ["train", "valid"], *args, **params)
+        # init_formatter(config, ["train", "valid"], *args, **params)
         result["train_dataset"], result["valid_dataset"] = init_dataset(config, *args, **params)
     else:
-        init_formatter(config, ["test"], *args, **params)
+        # init_formatter(config, ["test"], *args, **params)
         result["test_dataset"] = init_test_dataset(config, *args, **params)
 
     logger.info("Begin to initialize models...")
