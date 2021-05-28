@@ -76,6 +76,7 @@ def train(parameters, config, gpu_list, do_test=False):
     if total_len < 10000:
         more = "\t"
     for epoch_num in range(trained_epoch, epoch):
+        model.train()
         start_time = timer()
         current_epoch = epoch_num
 
