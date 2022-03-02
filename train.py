@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     if config.getboolean("distributed", "use"):
         if "LOCAL_RANK" in os.environ:
-            local_rank = os.environ["LOCAL_RANK"]
+            local_rank = int(os.environ["LOCAL_RANK"])
         else:
             local_rank = args.local_rank
         config.set('distributed', 'local_rank', local_rank)

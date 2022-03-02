@@ -12,9 +12,9 @@ class BertEncoder(nn.Module):
         self.bert = BertModel.from_pretrained(config.get("model", "bert_path"))
 
     def forward(self, x):
-        _, y = self.bert(x)
+        out = self.bert(x)
 
-        return y
+        return out.last_hidden_state[:,-1,:]
 
 
 class BasicBert(nn.Module):
@@ -23,7 +23,7 @@ class BasicBert(nn.Module):
 
         self.output_dim = config.getint("model", "output_dim")
         self.bert = BertEncoder(config, gpu_list, *args, **params)
-        self.fc = nn.Linear(768, self.output_dim)
+        self.fc = nn.Linear(self.bert.bert.config.hidden_size, self.output_dim)
 
         self.seq = nn.Sequential(self.bert, self.fc)
 
