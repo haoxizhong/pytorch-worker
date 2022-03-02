@@ -31,10 +31,7 @@ class BasicBert(nn.Module):
         self.accuracy_function = init_accuracy_function(config, *args, **params)
 
     def init_multi_gpu(self, device, config, *args, **params):
-        if config.getboolean("distributed", "use"):
-            self.seq = nn.parallel.DistributedDataParallel(self.seq, device_ids=device)
-        else:
-            self.seq = nn.DataParallel(self.seq, device_ids=device)
+        self.seq = nn.DataParallel(self.seq, device_ids=device)
 
     def forward(self, data, config, gpu_list, acc_result, mode):
         x = data['input']
