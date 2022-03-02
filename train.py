@@ -43,14 +43,10 @@ if __name__ == "__main__":
     else:
         local_rank = args.local_rank
     config.set('distributed', 'local_rank', local_rank)
-<<<<<<< HEAD
-    
     if config.getboolean("bmtrain", "use"):
         assert not config.getboolean("distributed", "use")
         import bmtrain as bmt
         bmt.init_distributed(seed=0)
-=======
->>>>>>> ddp
     if config.getboolean("distributed", "use"):
         torch.cuda.set_device(gpu_list[local_rank])
         torch.distributed.init_process_group(backend=config.get("distributed", "backend"))
