@@ -38,12 +38,17 @@ if __name__ == "__main__":
         for a in range(0, len(device_list)):
             gpu_list.append(int(a))
 
+    if "LOCAL_RANK" in os.environ:
+        local_rank = int(os.environ["LOCAL_RANK"])
+    else:
+        local_rank = args.local_rank
+    config.set('distributed', 'local_rank', local_rank)
+    
+    if config.getboolean("bmtrain", "use"):
+        assert not config.getboolean("distributed", "use")
+        import bmtrain as bmt
+        bmt.init_distributed(seed=0)
     if config.getboolean("distributed", "use"):
-        if "LOCAL_RANK" in os.environ:
-            local_rank = int(os.environ["LOCAL_RANK"])
-        else:
-            local_rank = args.local_rank
-        config.set('distributed', 'local_rank', local_rank)
         torch.cuda.set_device(gpu_list[local_rank])
         torch.distributed.init_process_group(backend=config.get("distributed", "backend"))
         config.set('distributed', 'gpu_num', len(gpu_list))

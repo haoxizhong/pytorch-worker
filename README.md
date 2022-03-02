@@ -36,10 +36,16 @@ python3 train.py --config config/nlp/BasicBert.config --gpu 2,3,5
 此外，除了原始的``DataParallel``的方法以外，我们还提供了使用``DistributedDataParallel``的多卡并行方法，运行命令为：
 
 ```bash
-python3 -m torch.distributed.launch train.py --config config/nlp/BasicBert.config --gpu 2,3,5
+python3 -m torch.distributed.launch train.py --nproc_per_node=3 --config config/nlp/BasicBert.config --gpu 2,3,5
 ```
 
-具体的实现方法请参考模型中的写法。
+或
+
+```bash
+torchrun train.py --nproc_per_node=3 --config config/nlp/BasicBert.config --gpu 2,3,5
+```
+
+具体的实现方法请参考模型中的写法；更多使用方法可以参考 torchrun 的文档。
 
 当然，如果你不想使用GPU来运行你的模型的话，你可以去掉``--gpu``选项来完成这一点，例如：
 
@@ -124,6 +130,10 @@ python3 train.py --config config/nlp/BasicBert.config
 - ``json_format``：可选参数（仅用于``ImageFromJson,JsonFromFiles``两种数据读取器），代表对应的``json``文件的格式。如果为``line``代表一行一个``json``数据；如果为``single``代表整个文件为一个``json``数据。
 - ``load_into_mem``：可选参数（仅用于``ImageFromJson,JsonFromFiles``两种数据读取器），代表是否提前把所有数据加载到内存中。
 - ``prefix``：可选参数（仅用于``ImageFromJson``数据读取器），代表图片的相对路径起始位置。
+
+**[bmtrain]： BMTrain 参数**
+
+- ``use``：必要参数，代表是否使用 BMTrain。注意该参数不能与 ``distributed`` 下的 ``use`` 参数同时为 ``True``（即不能同时使用 ``DistributedDataParallel`` 和 BMTrain）。
 
 **[distributed]： 多卡参数**
 

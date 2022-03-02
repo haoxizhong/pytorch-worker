@@ -32,7 +32,11 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
         if params['local_rank'] < 0:
             model = model.cuda()
             model.init_multi_gpu(gpu_list, config, *args, **params)
+        elif config.getboolean("bmtrain", "use"):
+            import bmtrain as bmt
+            model = bmt.BMTrainModelWrapper(model)
         else:
+            assert config.getboolean("distributed", "use")
             model = model.to(gpu_list[params['local_rank']])
             model = nn.parallel.DistributedDataParallel(
                 model,
