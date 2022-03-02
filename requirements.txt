@@ -2,6 +2,7 @@ torchvision==0.2.1
 opencv_python==4.1.0.25
 torch==1.0.0
 tqdm==4.31.1
+transformers==4.17.0
 pytorch_pretrained_bert==0.6.2
 numpy==1.16.2
 tensorboardX==1.8

@@ -2,7 +2,7 @@ import json
 import torch
 import os
 
-from pytorch_transformers.tokenization_bert import BertTokenizer
+from transformers import BertTokenizer
 
 from formatter.Basic import BasicFormatter
 

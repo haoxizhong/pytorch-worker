@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pytorch_transformers import BertModel
+from transformers import BertModel
 
 from tools.accuracy_init import init_accuracy_function
 
