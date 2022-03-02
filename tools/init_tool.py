@@ -5,6 +5,7 @@ from reader.reader import init_dataset, init_formatter, init_test_dataset
 from model import get_model
 from model.optimizer import init_optimizer
 from .output_init import init_output_function
+from torch import nn
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +29,16 @@ def init_all(config, gpu_list, checkpoint, mode, *args, **params):
     global_step = 0
 
     if len(gpu_list) > 0:
-        model = model.cuda()
-
-        try:
+        if params['local_rank'] < 0:
+            model = model.cuda()
             model.init_multi_gpu(gpu_list, config, *args, **params)
-        except Exception as e:
-            logger.warning("No init_multi_gpu implemented in the model, use single gpu instead.")
+        else:
+            model = model.to(gpu_list[params['local_rank']])
+            model = nn.parallel.DistributedDataParallel(
+                model,
+                device_ids = [params['local_rank']],
+                find_unused_parameters = True
+            )
 
     try:
         parameters = torch.load(checkpoint)

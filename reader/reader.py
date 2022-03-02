@@ -3,6 +3,7 @@ import logging
 
 import formatter as form
 from dataset import dataset_list
+from torch.utils.data.distributed import DistributedSampler
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +68,21 @@ def init_one_dataset(config, mode, *args, **params):
             except Exception as e:
                 logger.warning("[eval] reader num has not been defined in config file, use [train] reader num instead.")
 
-        dataloader = DataLoader(dataset=dataset,
-                                batch_size=batch_size,
-                                shuffle=shuffle,
-                                num_workers=reader_num,
-                                collate_fn=collate_fn[mode],
-                                drop_last=drop_last)
+        if config.getboolean('distributed', 'use'):
+            dataloader = DataLoader(dataset=dataset,
+                                    batch_size=batch_size,
+                                    # shuffle=shuffle,
+                                    num_workers=reader_num,
+                                    collate_fn=collate_fn[mode],
+                                    drop_last=drop_last,
+                                    sampler=DistributedSampler(dataset))
+        else:
+            dataloader = DataLoader(dataset=dataset,
+                                    batch_size=batch_size,
+                                    shuffle=shuffle,
+                                    num_workers=reader_num,
+                                    collate_fn=collate_fn[mode],
+                                    drop_last=drop_last)
 
         return dataloader
     else:

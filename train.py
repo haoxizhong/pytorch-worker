@@ -19,15 +19,13 @@ if __name__ == "__main__":
     parser.add_argument('--gpu', '-g', help="gpu id list")
     parser.add_argument('--checkpoint', help="checkpoint file path")
     parser.add_argument('--do_test', help="do test while training or not", action="store_true")
-    parser.add_argument('--local_rank', help='local rank', default=0)
+    parser.add_argument('--local_rank', type=int, help='local rank', default=-1)
     args = parser.parse_args()
 
     configFilePath = args.config
 
     config = create_config(configFilePath)
-    if config.getboolean("distributed", "use"):
-        torch.distributed.init_process_group(backend=config.get("distributed", "backend"))
-
+    
     use_gpu = True
     gpu_list = []
     if args.gpu is None:
@@ -35,10 +33,20 @@ if __name__ == "__main__":
     else:
         use_gpu = True
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
-
+        
         device_list = args.gpu.split(",")
         for a in range(0, len(device_list)):
             gpu_list.append(int(a))
+
+    if config.getboolean("distributed", "use"):
+        if "LOCAL_RANK" in os.environ:
+            local_rank = os.environ["LOCAL_RANK"]
+        else:
+            local_rank = args.local_rank
+        config.set('distributed', 'local_rank', local_rank)
+        torch.cuda.set_device(gpu_list[local_rank])
+        torch.distributed.init_process_group(backend=config.get("distributed", "backend"))
+        config.set('distributed', 'gpu_num', len(gpu_list))
 
     os.system("clear")
 
@@ -48,9 +56,9 @@ if __name__ == "__main__":
         logger.error("CUDA is not available but specific gpu id")
         raise NotImplementedError
 
-    parameters = init_all(config, gpu_list, args.checkpoint, "train")
+    parameters = init_all(config, gpu_list, args.checkpoint, "train", local_rank = local_rank)
     do_test = False
     if args.do_test:
         do_test = True
 
-    train(parameters, config, gpu_list, do_test)
+    train(parameters, config, gpu_list, do_test, local_rank)
